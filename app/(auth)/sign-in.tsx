@@ -12,8 +12,12 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import Toast from "react-native-root-toast";
+import { axiosInstance } from "@/lib/axiosInstance";
+import config from "@/lib/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { decodeAuthToken } from "@/lib/decodeToken";
 
-const API_URL = "http://192.168.100.114:8000/api/auth/login";
+// const API_URL = "http://192.168.100.114:8000/api/auth/login";
 
 export default function App() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -27,12 +31,15 @@ export default function App() {
     }
 
     try {
-      const response = await axios.post(API_URL, {
+      const response = await axiosInstance.post(`${config.apiUrl}/auth/login`, {
         phoneNumber,
         pin,
       });
 
       const { message, token, role } = response.data;
+      console.log("response", response.data);
+      await AsyncStorage.setItem("session_token", token);
+    decodeAuthToken(token);
 
       // Check if the role is 'Driver'
       if (role === "Driver") {

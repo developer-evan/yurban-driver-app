@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Button,
+  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import axios from "axios";
-import MapViewDirections from "react-native-maps-directions";
-import Maps from "@/components/Maps";
+import { axiosInstance } from "@/lib/axiosInstance";
+import config from "@/lib/config";
 
 export default function HomeScreen() {
   const [isOnline, setIsOnline] = useState(false);
@@ -20,7 +20,6 @@ export default function HomeScreen() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Get the driver's current location
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -35,14 +34,20 @@ export default function HomeScreen() {
     })();
   }, []);
 
-  // Function to toggle online/offline status
   const toggleStatus = async () => {
     try {
       const newStatus = !isOnline;
-      await axios.post("/update-status", {
+      await axiosInstance.patch(`${config.apiUrl}/auth/update-status`, {
         status: newStatus ? "Online" : "Offline",
+        // console.log("status", newStatus ? "Online" : "Offline") // added this line
       });
       setIsOnline(newStatus);
+      ToastAndroid.show(
+        `You are now ${newStatus ? "Online" : "Offline"}`,
+
+        // ToastAndroid.SHORT,
+        ToastAndroid.TOP
+      );
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -59,45 +64,40 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Display current location map */}
-      {/* <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: location ? location.latitude : 0,
-          longitude: location ? location.longitude : 0,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        showsUserLocation={true}
-        followsUserLocation={true}
-      >
-        {location && <Marker coordinate={location} title="You are here" />}
-      </MapView> */}
-
-      {/* <MapViewDirections
-  origin={location}
-  destination={{ latitude: destLat, longitude: destLng }}
-  apikey="AIzaSyBjHiDRnIv_k2j1dMb6XIZYRWuFT5aYCQY"
-  strokeWidth={3}
-  strokeColor="blue"
-/> */}
-      <View
-        style={{
-          width: "100%",
-          height: "50%",
-          // position: "absolute",
-        }}
-      >
-        <Maps />
+      <View style={styles.mapContainer}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: location ? location.latitude : 0,
+            longitude: location ? location.longitude : 0,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation={true}
+          followsUserLocation={true}
+        >
+          {location && <Marker coordinate={location} title="Your Location" />}
+        </MapView>
       </View>
 
-      {/* Status Toggle Button */}
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isOnline ? "Go Offline" : "Go Online"}
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusText}>
+          {isOnline ? "You are ONLINE" : "You are OFFLINE"}
+        </Text>
+        {/* <Text style={styles.promotionText}>
+          (Enjoy 5% Extra on Rides Today!)
+        </Text> */}
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            { backgroundColor: isOnline ? "red" : "green" },
+          ]}
           onPress={toggleStatus}
-          color={isOnline ? "red" : "green"}
-        />
+        >
+          <Text style={styles.toggleButtonText}>
+            {isOnline ? "GO OFFLINE" : "GO ONLINE"}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -106,19 +106,39 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "white",
+    backgroundColor: "#f0f0f0",
   },
-  map: {
+  mapContainer: {
     flex: 1,
   },
-  buttonContainer: {
-    position: "absolute",
-    bottom: 30,
-    alignSelf: "center",
-    width: "90%",
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  statusContainer: {
+    alignItems: "center",
+    paddingVertical: 15,
+    backgroundColor: "#1a1a1a",
+  },
+  statusText: {
+    fontSize: 18,
+    color: "white",
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  promotionText: {
+    fontSize: 12,
+    color: "red",
+    marginBottom: 10,
+  },
+  toggleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+  },
+  toggleButtonText: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
   },
   loadingContainer: {
     flex: 1,
