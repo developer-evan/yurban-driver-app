@@ -9,16 +9,17 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { axiosInstance } from "@/lib/axiosInstance";
-import config from "@/lib/config";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getUserProfile } from "@/services/getProfile";
+import { updateDriverStatus } from "@/services/updateDriverStatus";
 
 export default function HomeScreen() {
-  const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     (async () => {
@@ -34,30 +35,73 @@ export default function HomeScreen() {
     })();
   }, []);
 
-  const toggleStatus = async () => {
-    try {
-      const newStatus = !isOnline;
-      await axiosInstance.patch(`${config.apiUrl}/auth/update-status`, {
-        status: newStatus ? "Online" : "Offline",
-        // console.log("status", newStatus ? "Online" : "Offline") // added this line
-      });
-      setIsOnline(newStatus);
-      ToastAndroid.show(
-        `You are now ${newStatus ? "Online" : "Offline"}`,
+  const {
+    data: user,
+    isLoading: userLoading,
+    error: userError,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getUserProfile,
+  });
+  // const updateTaskMutation = useMutation({
+  //   mutationFn: async (updatedTask: any) => {
+  //     return updateTask(id, updatedTask);
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["task"] });
+  //     ToastAndroid.show("Task updated successfully", ToastAndroid.LONG);
+  //     router.push("/tasks");
+  //   },
+  //   onError: (error: any) => {
+  //     ToastAndroid.show(
+  //       error?.response?.data?.message || "Something went wrong",
+  //       ToastAndroid.LONG
+  //     );
+  //   },
+  // });
+  // const mutation = useMutation<void, Error, { status: string }>({
+  //   mutationFn: updateDriverStatus,
+  //   onSuccess: () => {
+  //     // Invalidate and refetch profile data to update UI
+  //     queryClient.invalidateQueries({ queryKey: ["profile"] });
+  //     ToastAndroid.show("Status updated successfully!", ToastAndroid.SHORT);
+  //   },
+  //   onError: (error: any) => {
+  //     ToastAndroid.show(
+  //       `Error updating status: ${error.message}`,
+  //       ToastAndroid.SHORT
+  //     );
+  //   },
+  // });
 
-        // ToastAndroid.SHORT,
-        ToastAndroid.TOP
+  const updateStatusMutation = useMutation({
+    mutationFn: async (newStatus: any) => {
+      return updateDriverStatus(newStatus);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      ToastAndroid.show("Status updated successfully!", ToastAndroid.SHORT);
+      
+    },
+    onError: (error: any) => {
+      ToastAndroid.show(
+        error?.response?.data?.message || "Something went wrong",
+        ToastAndroid.LONG
       );
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
+    },
+  });
+
+
+  const toggleStatus = () => {
+    const newStatus = user?.user?.status === "Online" ? "Offline" : "Online";
+    updateStatusMutation.mutate({ status: newStatus });
   };
 
-  if (loading) {
+  if (loading || userLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading map...</Text>
+        <Text>Loading...</Text>
       </View>
     );
   }
@@ -82,20 +126,22 @@ export default function HomeScreen() {
 
       <View style={styles.statusContainer}>
         <Text style={styles.statusText}>
-          {isOnline ? "You are ONLINE" : "You are OFFLINE"}
+          {user?.user?.status === "Online"
+            ? "You are ONLINE"
+            : "You are OFFLINE"}
         </Text>
-        {/* <Text style={styles.promotionText}>
-          (Enjoy 5% Extra on Rides Today!)
-        </Text> */}
         <TouchableOpacity
           style={[
             styles.toggleButton,
-            { backgroundColor: isOnline ? "red" : "green" },
+            {
+              backgroundColor:
+                user?.user?.status === "Online" ? "red" : "green",
+            },
           ]}
           onPress={toggleStatus}
         >
           <Text style={styles.toggleButtonText}>
-            {isOnline ? "GO OFFLINE" : "GO ONLINE"}
+            {user?.user?.status === "Online" ? "GO OFFLINE" : "GO ONLINE"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -124,11 +170,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     marginBottom: 5,
-  },
-  promotionText: {
-    fontSize: 12,
-    color: "red",
-    marginBottom: 10,
   },
   toggleButton: {
     paddingVertical: 10,

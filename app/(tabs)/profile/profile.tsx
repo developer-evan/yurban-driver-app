@@ -12,49 +12,63 @@ import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { Edit } from "react-feather"; // Make sure to import your Edit icon
 import config from "@/lib/config";
 import { axiosInstance } from "@/lib/axiosInstance";
+import { useQuery } from "@tanstack/react-query";
+import { getUserProfile } from "@/services/getProfile";
 
-const Profile = () => {
-  interface User {
+
+interface User {
+  profilePicture: string;
+  firstName: string;
+  role: string;
+  email: string;
+  phone: string;
+  website: string;
+  address: string;
+  user: {
     profilePicture: string;
     firstName: string;
+    lastName: string;
     role: string;
     email: string;
-    phone: string;
-    website: string;
-    address: string;
-    user: {
-      profilePicture: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-      email: string;
-      phoneNumber: string;
-      county: string;
-      gender: string;
-    }
-    
+    phoneNumber: string;
+    county: string;
+    gender: string;
+  }   
+}
 
-  }
 
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Function to fetch profile data
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosInstance.get(`${config.apiUrl}/profile`);
-        setUser(response.data); // Assuming the API response contains user data
-        setIsLoading(false);
-      } catch (err: any) {
-        setError(err.message || "Failed to load profile");
-        setIsLoading(false);
-      }
-    };
+const Profile = () => {
+ 
 
-    fetchProfile();
-  }, []);
+  // const [user, setUser] = useState<User | null>(null);
+  // const [isLoading, setIsLoading] = useState(true);
+  // const [error, setError] = useState(null);
+
+  // useEffect(() => {
+  //   // Function to fetch profile data
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const response = await axiosInstance.get(`${config.apiUrl}/profile`);
+  //       setUser(response.data);
+  //       setIsLoading(false);
+  //     } catch (err: any) {
+  //       setError(err.message || "Failed to load profile");
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchProfile();
+  // }, []);
+
+  const {
+    data:user,
+    isLoading,
+    error    
+  } =useQuery({
+    queryKey: ["profile"],
+    queryFn:getUserProfile,
+  })
 
   if (isLoading) {
     return (
@@ -68,7 +82,7 @@ const Profile = () => {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorText}>{error?.toString()}</Text>
       </View>
     );
   }

@@ -13,10 +13,15 @@ import "../global.css";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React from "react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
+const client = new QueryClient();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -34,7 +39,8 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={client}>
+
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -42,6 +48,6 @@ export default function RootLayout() {
       </Stack>
       {/* colorScheme === "dark" ? DarkTheme : DefaultTheme */}
       <StatusBar style={colorScheme === "dark" ? DarkTheme : DefaultTheme} />
-    </>
+    </QueryClientProvider>
   );
 }
