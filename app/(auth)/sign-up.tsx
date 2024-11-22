@@ -7,6 +7,7 @@ import {
   Text,
   Alert,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import axios from "axios";
 import { useRouter } from "expo-router";
@@ -91,12 +92,23 @@ export default function SignUp() {
         hideOnPress: true,
         delay: 0,
       });
-      
     }
   };
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../../assets/images/yurbann.png")}
+        style={{
+          width: 80,
+          height: 80,
+          marginBottom: 20,
+          // borderRadius: "100%",
+          // alignSelf: "center",
+          // backgroundColor: "#f8f9fa",
+          // padding: 20,
+        }}
+      />
       <View style={styles.title}>
         <Text style={styles.titleText}>Sign Up</Text>
         <Text style={styles.subtitleText}>Register for an account</Text>
@@ -139,13 +151,18 @@ export default function SignUp() {
         value={pin}
         onChangeText={setPin}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Gender"
-        value={gender}
-        onChangeText={setGender}
-      />
-
+      <View style={styles.pickerContainer}>
+        <RNPickerSelect
+          onValueChange={(value) => setGender(value)}
+          items={[
+            { label: "Male", value: "Male" },
+            { label: "Female", value: "Female" },
+          ]}
+          style={pickerSelectStyles}
+          placeholder={{ label: "Select Gender", value: null }}
+          value={gender}
+        />
+      </View>
       <View style={styles.pickerContainer}>
         <RNPickerSelect
           onValueChange={handleCountySelect}

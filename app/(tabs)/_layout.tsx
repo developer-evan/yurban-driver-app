@@ -1,15 +1,25 @@
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, View, Image, TouchableOpacity } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { getUserProfile } from "@/services/getProfile";
+import { useQuery } from "@tanstack/react-query";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getUserProfile,
+  });
 
   return (
     <Tabs
@@ -39,16 +49,56 @@ export default function TabLayout() {
         options={{
           headerShown: true,
           title: "Home",
+          headerRight: () => (
+            // <IconSymbol size={28} name="house.fill" color="#000" />
+            <TouchableOpacity
+              onPress={() => {
+                router.push("/(tabs)/profile/profile");
+              }}
+            >
+              <Image
+                source={{ uri: user?.user?.profilePicture }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginRight: 20,
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                }}
+              />
+            </TouchableOpacity>
+          ),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="my-rides/my-rides"
+        name="my-rides"
         options={{
           headerShown: true,
           title: "My Rides",
+          headerRight: () => (
+            // <IconSymbol size={28} name="house.fill" color="#000" />
+            <TouchableOpacity
+              onPress={() => {
+                router.push("/(tabs)/profile/profile");
+              }}
+            >
+              <Image
+                source={{ uri: user?.user?.profilePicture }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginRight: 20,
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                }}
+              />
+            </TouchableOpacity>
+          ),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="car.fill" color={color} />
           ),
@@ -58,7 +108,28 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile/profile"
         options={{
+          headerShown: true,
           title: "Profile",
+          headerRight: () => (
+            // <IconSymbol size={28} name="house.fill" color="#000" />
+            <TouchableOpacity
+              onPress={() => {
+                router.push("/(tabs)/profile/profile");
+              }}
+            >
+              <Image
+                source={{ uri: user?.user?.profilePicture }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginRight: 20,
+                  borderColor: "#fff",
+                  borderWidth: 2,
+                }}
+              />
+            </TouchableOpacity>
+          ),
           tabBarIcon: ({ color }) => (
             // <IconSymbol size={28} name="person" color={color} />
             <IconSymbol size={28} name="person.fill" color={color} />

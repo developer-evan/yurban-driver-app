@@ -8,7 +8,7 @@ import { jwtDecode } from "jwt-decode";
 export function decodeAuthToken(token: string) {
   try {
     const decoded: any = jwtDecode(token);
-    console.log("Decoded token:", decoded);
+    // console.log("Decoded token:", decoded);
     const user_id = decoded.userId;
     // const roles = decoded.roles;
     const email = decoded.email;
@@ -19,13 +19,13 @@ export function decodeAuthToken(token: string) {
     // AsyncStorage.setItem("username", username);
     AsyncStorage.setItem("user_id", user_id);
 
-    console.log("Stored user data in AsyncStorage:", {
-      user_id,
-      //   roles,
-      email,
-    });
+    // console.log("Stored user data in AsyncStorage:", {
+    //   user_id,
+    //   //   roles,
+    //   email,
+    // });
   } catch (error) {
-    console.error("Error decoding token:", error);
+    // console.error("Error decoding token:", error);
     throw error;
   }
 }

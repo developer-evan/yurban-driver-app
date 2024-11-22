@@ -22,12 +22,12 @@ axiosInstance.interceptors.request.use(
 );
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("axios response", response);
+    // console.log("axios response", response);
     return response;
   },
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      console.log("Unauthorized error (401), redirecting to login", error);
+      // console.log("Unauthorized error (401), redirecting to login", error);
 
       router.replace("/(auth)" as any);
     }

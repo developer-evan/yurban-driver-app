@@ -1,18 +1,25 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
- 
-} from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { StatusBar } from "expo-status-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const StartScreen = () => {
   const router = useRouter();
+
+  useEffect(() => {
+    const checkAuthState = async () => {
+      const accessToken = await AsyncStorage.getItem("session_token");
+      if (accessToken) {
+        router.replace("/(tabs)/home/home");
+      }
+      else {
+        router.replace("/(auth)");
+      }
+    };
+    checkAuthState();
+  }, []);
 
   const handleLogin = () => {
     router.push("/(auth)/sign-in");
@@ -24,7 +31,7 @@ const StartScreen = () => {
 
   return (
     <View style={styles.container}>
-     <StatusBar style="auto" />
+      <StatusBar style="auto" />
       {/* Illustration */}
       <Image
         source={require("../../assets/images/yurban.png")} // Replace with your illustration's path

@@ -7,11 +7,13 @@ import {
   Text,
   Alert,
   TouchableOpacity,
+  ToastAndroid,
+  Image,
 } from "react-native";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import Toast from "react-native-root-toast";
+// import Toast, { ToastContainer } from "react-native-root-toast";
 import { axiosInstance } from "@/lib/axiosInstance";
 import config from "@/lib/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -26,7 +28,12 @@ export default function App() {
 
   const handleLogin = async () => {
     if (!phoneNumber || !pin) {
-      Alert.alert("Error", "Please enter both phone number and pin.");
+      // Alert.alert("Error", "Please enter both phone number and pin.");
+      ToastAndroid.show(
+        "Please enter both phone number and pin.",
+        ToastAndroid.SHORT
+      );
+
       return;
     }
 
@@ -39,7 +46,7 @@ export default function App() {
       const { message, token, role } = response.data;
       console.log("response", response.data);
       await AsyncStorage.setItem("session_token", token);
-    decodeAuthToken(token);
+      decodeAuthToken(token);
 
       // Check if the role is 'Driver'
       if (role === "Driver") {
@@ -47,29 +54,39 @@ export default function App() {
         // Alert.alert("Login Success", "Welcome Driver!", [
         //   { text: "OK", onPress: () => console.log("Driver logged in") },
         // ]);
-        Toast.show(message, {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-        });
+        ToastAndroid.show("Welcome Driver!", ToastAndroid.SHORT);
 
         router.push("/(tabs)/home/home");
         // Save token or navigate to the next screen if necessary
       } else {
         // Alert.alert("Error", "Only drivers can log in.");
-        Toast.show("Only drivers can log in.", {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: Colors.light.tint,
-        });
+        ToastAndroid.show("Only drivers can log in.", ToastAndroid.SHORT);
       }
     } catch (error) {
-      Alert.alert("Error", "Invalid credentials or server issue.");
-      console.error(error);
+      // Alert.alert("Error", "Invalid credentials or server issue.");
+      // console.error(error);
+      ToastAndroid.show(
+        "Invalid credentials or server issue.",
+        ToastAndroid.SHORT
+      );
     }
   };
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../../assets/images/yurbann.png")}
+        style={{
+          width: 90,
+          height: 90,
+          marginBottom: 20,
+          // borderRadius: "100%",
+          // alignSelf: "center",
+          // backgroundColor: "#f8f9fa",
+          // padding: 20,
+        }}
+      />
+
       <View style={styles.title}>
         <Text
           style={{
