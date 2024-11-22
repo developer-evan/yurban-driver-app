@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -7,59 +7,15 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import axios from "axios";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
-import { Edit } from "react-feather"; // Make sure to import your Edit icon
-import config from "@/lib/config";
-import { axiosInstance } from "@/lib/axiosInstance";
 import { useQuery } from "@tanstack/react-query";
-import { getUserProfile } from "@/services/getProfile";
-import { Colors } from "@/constants/Colors";
-import { LogOut, MapPinned, Pen, User } from "lucide-react-native";
+import { LogOut, MapPinned, User } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-
-interface User {
-  profilePicture: string;
-  firstName: string;
-  role: string;
-  email: string;
-  phone: string;
-  website: string;
-  address: string;
-  user: {
-    profilePicture: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    email: string;
-    phoneNumber: string;
-    county: string;
-    gender: string;
-  };
-}
+import { getUserProfile } from "@/services/getProfile";
+import { Colors } from "@/constants/Colors";
 
 const Profile = () => {
-  // const [user, setUser] = useState<User | null>(null);
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [error, setError] = useState(null);
-
-  // useEffect(() => {
-  //   // Function to fetch profile data
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const response = await axiosInstance.get(`${config.apiUrl}/profile`);
-  //       setUser(response.data);
-  //       setIsLoading(false);
-  //     } catch (err: any) {
-  //       setError(err.message || "Failed to load profile");
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchProfile();
-  // }, []);
-
   const {
     data: user,
     isLoading,
@@ -68,23 +24,6 @@ const Profile = () => {
     queryKey: ["profile"],
     queryFn: getUserProfile,
   });
-
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1E90FF" />
-        <Text style={styles.loadingText}>Loading profile...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error?.toString()}</Text>
-      </View>
-    );
-  }
 
   const handleLogout = async () => {
     try {
@@ -95,34 +34,33 @@ const Profile = () => {
         "email",
       ]);
       console.log("User logged out successfully.");
-      router.push("/(auth)" as any); 
+      router.push("/(auth)" as any);
     } catch (error) {
       console.error("Failed to log out:", error);
     }
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.light.tint} />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Failed to load profile</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          // flex: 1,
-          // justifyContent: "center",
-          // alignItems: "center",
-          backgroundColor: "#ffffff",
-          borderRadius: 10,
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 20,
-            width: "100%",
-            // backgroundColor: "#f8f9fa",
-            gap: 20,
-          }}
-        >
+      <View style={styles.card}>
+        <View style={styles.header}>
           <Image
             source={{ uri: user?.user?.profilePicture }}
             style={styles.profileImage}
@@ -138,59 +76,36 @@ const Profile = () => {
         </View>
 
         <View style={styles.detailContainer}>
-          <MaterialIcons
-            name="email"
-            size={24}
-            color="#6c757d"
-            style={styles.icon}
-          />
+          <MaterialIcons name="email" size={24} color="#6c757d" />
           <Text style={styles.detailText}>{user?.user?.email}</Text>
         </View>
 
         <View style={styles.detailContainer}>
-          <FontAwesome
-            name="phone"
-            size={24}
-            color="#6c757d"
-            style={styles.icon}
-          />
+          <FontAwesome name="phone" size={24} color="#6c757d" />
           <Text style={styles.detailText}>
             {user?.user?.phoneNumber || "Not available"}
           </Text>
         </View>
 
         <View style={styles.detailContainer}>
-          <MapPinned size={24} color="#6c757d" style={styles.icon} />
+          <MapPinned size={24} color="#6c757d" />
           <Text style={styles.detailText}>
-            {user?.user?.subCounty || "Not available"} -
+            {user?.user?.subCounty || "Not available"} -{" "}
             {user?.user?.county || "Not available"}
           </Text>
         </View>
 
         <View style={styles.detailContainer}>
-          <User size={24} color="#6c757d" style={styles.icon} />
+          <User size={24} color="#6c757d" />
           <Text style={styles.detailText}>
             {user?.user?.gender || "Not available"}
           </Text>
         </View>
       </View>
-      <TouchableOpacity
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: Colors.light.tint,
-          width: "85%",
-          padding: 12,
-          borderRadius: 10,
-          marginVertical: 6,
-          marginHorizontal: 6,
-          justifyContent: "center",
-        }}
-        onPress={handleLogout}
-      >
-        {/* <Pen size={24} color="white" style={styles.icon} /> */}
-        <LogOut size={24} color="white" style={styles.icon} />
-        <Text style={[styles.detailText, { color: "white" }]}>Sign Out</Text>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <LogOut size={24} color="white" />
+        <Text style={styles.logoutText}>Sign Out</Text>
       </TouchableOpacity>
     </View>
   );
@@ -201,45 +116,67 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: "center",
-    marginTop: 20,
     alignItems: "center",
-    padding: 5,
+    backgroundColor: "#f9f9f9",
+    padding: 20,
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 20,
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
   },
   profileImage: {
     width: 80,
     height: 80,
-    borderRadius: 60,
-    marginBottom: 20,
-    borderWidth: 3,
-    // borderColor: "#A78BFA",
+    borderRadius: 40,
+    marginRight: 15,
+    borderWidth: 2,
     borderColor: Colors.light.tint,
   },
   name: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: "bold",
     color: Colors.light.tint,
   },
   role: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#6c757d",
-    marginBottom: 20,
-    fontStyle: "italic",
   },
   detailContainer: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
-    padding: 8,
-    borderRadius: 10,
-    marginVertical: 3,
-  },
-  icon: {
-    marginRight: 12,
+    marginVertical: 10,
   },
   detailText: {
     fontSize: 16,
     color: "#333",
+    marginLeft: 12,
+  },
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.tint,
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    width: "100%",
+    justifyContent: "center",
+  },
+  logoutText: {
+    color: "white",
+    fontSize: 16,
+    marginLeft: 10,
   },
   loadingContainer: {
     flex: 1,
@@ -247,9 +184,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    fontSize: 16,
-    color: "#1E90FF",
     marginTop: 10,
+    fontSize: 16,
+    color: Colors.light.tint,
   },
   errorContainer: {
     flex: 1,
@@ -257,7 +194,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#d9534f",
   },
 });

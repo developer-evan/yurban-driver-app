@@ -10,12 +10,15 @@ const StartScreen = () => {
 
   useEffect(() => {
     const checkAuthState = async () => {
-      const accessToken = await AsyncStorage.getItem("session_token");
-      if (accessToken) {
-        router.replace("/(tabs)/home/home");
-      }
-      else {
-        router.replace("/(auth)");
+      try {
+        const accessToken = await AsyncStorage.getItem("session_token");
+        if (accessToken) {
+          router.replace("/(tabs)/home/home"); // Redirect to Home if token exists
+        } else {
+          router.replace("/(auth)/sign-in"); // Redirect to Sign In if no token
+        }
+      } catch (error) {
+        console.error("Error checking auth state:", error);
       }
     };
     checkAuthState();
@@ -109,7 +112,6 @@ const styles = StyleSheet.create({
   loginButton: {
     width: "100%",
     paddingVertical: 15,
-    // backgroundColor: "#007AFF",
     backgroundColor: Colors.light.tint,
     borderRadius: 25,
     alignItems: "center",
