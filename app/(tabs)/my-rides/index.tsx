@@ -35,7 +35,8 @@ const MyRides = () => {
   });
 
   const renderRideCard = ({ item }: { item: Ride }) => (
-    <TouchableOpacity style={styles.card}
+    <TouchableOpacity
+      style={styles.card}
       onPress={() => {
         router.push(`/(tabs)/my-rides/ride-details/${item._id}` as any);
       }}
@@ -121,10 +122,27 @@ const MyRides = () => {
     );
   }
 
+  // return (
+  //   <View style={styles.container}>
+  //     <FlatList
+  //       data={rides}
+  //       renderItem={renderRideCard}
+  //       keyExtractor={(item) => item._id}
+  //       contentContainerStyle={styles.listContainer}
+  //       showsVerticalScrollIndicator={false}
+  //       onRefresh={refetch}
+  //       refreshing={isLoading}
+  //     />
+  //   </View>
+  // );
   return (
     <View style={styles.container}>
       <FlatList
-        data={rides}
+        data={rides.sort(
+          (a, b) =>
+            new Date(b.requestedAt).getTime() -
+            new Date(a.requestedAt).getTime()
+        )}
         renderItem={renderRideCard}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContainer}
