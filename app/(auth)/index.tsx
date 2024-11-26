@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
 
 const StartScreen = () => {
   const router = useRouter();
@@ -13,14 +14,22 @@ const StartScreen = () => {
       try {
         const accessToken = await AsyncStorage.getItem("session_token");
         if (accessToken) {
-          router.replace("/(tabs)/home/home"); // Redirect to Home if token exists
+          // Decode the token to extract user info
+          const decodedToken = jwtDecode(accessToken);
+
+          if (decodedToken.role === "Driver") {
+            router.replace("/(tabs)/home/home"); // Redirect to Home if Customer
+          } else {
+            console.log("Access denied: Not a Customer");
+          }
         } else {
-          router.replace("/(auth)/sign-in"); // Redirect to Sign In if no token
+          console.log("No token found. Please sign in.");
         }
       } catch (error) {
         console.error("Error checking auth state:", error);
       }
     };
+
     checkAuthState();
   }, []);
 

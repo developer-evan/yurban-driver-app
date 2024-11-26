@@ -5,7 +5,7 @@ import {
   TextInput,
   Button,
   Text,
-  Alert,
+ 
   TouchableOpacity,
   ToastAndroid,
   Image,
@@ -19,7 +19,7 @@ import config from "@/lib/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { decodeAuthToken } from "@/lib/decodeToken";
 
-// const API_URL = "http://192.168.100.114:8000/api/auth/login";
+
 
 export default function App() {
   const [phoneNumber, setPhoneNumber] = useState("");

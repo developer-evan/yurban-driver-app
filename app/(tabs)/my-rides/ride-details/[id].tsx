@@ -11,7 +11,6 @@ import {
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { getRideDetails } from "@/services/getRideDetails";
 import { axiosInstance } from "@/lib/axiosInstance";
 import config from "@/lib/config";
@@ -170,7 +169,9 @@ const RideDetails = () => {
                 ? "orange"
                 : ride.status === "Accepted"
                 ? "green"
-                : "red",
+                : ride.status === "Rejected"
+                ? "red"
+                : "#007BFF",
           }}
         >
           Status: {ride.status || "N/A"}
@@ -181,15 +182,38 @@ const RideDetails = () => {
             ? new Date(ride.requestedAt).toLocaleString()
             : "N/A"}
         </Text>
+
+        {ride.status === "Completed" ? (
+          <View style={styles.successMessageContainer}>
+            <Text style={styles.successMessage}>
+              The ride has been completed successfully!
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={styles.acceptButton}
+              onPress={handleAccept}
+            >
+              <Text style={styles.buttonText}>Accept</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.declineButton}
+              onPress={handleDecline}
+            >
+              <Text style={styles.buttonText}>Decline</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
-      <View style={styles.actions}>
+      {/* <View style={styles.actions}>
         <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
           <Text style={styles.buttonText}>Accept</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
           <Text style={styles.buttonText}>Decline</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -197,56 +221,117 @@ const RideDetails = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f2f2f2",
   },
   map: {
     flex: 1,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: "hidden",
   },
   detailsContainer: {
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "700",
     marginBottom: 10,
+    color: "#333",
+  },
+  text: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 8,
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 5,
+    textAlign: "center",
+  },
+  successText: {
+    color: "green",
+    backgroundColor: "#e6ffe6",
+  },
+  pendingText: {
+    color: "orange",
+    backgroundColor: "#fff4e6",
+  },
+  rejectedText: {
+    color: "red",
+    backgroundColor: "#ffe6e6",
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "#fff",
+    marginTop: 20,
   },
   acceptButton: {
     backgroundColor: "#28a745",
-    padding: 10,
-    borderRadius: 5,
+    paddingVertical: 12,
+    borderRadius: 10,
     width: "48%",
+    alignItems: "center",
+    shadowColor: "#28a745",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   declineButton: {
     backgroundColor: "#dc3545",
-    padding: 10,
-    borderRadius: 5,
+    paddingVertical: 12,
+    borderRadius: 10,
     width: "48%",
+    alignItems: "center",
+    shadowColor: "#dc3545",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 16,
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f2f2f2",
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    backgroundColor: "#fff",
+    padding: 20,
   },
   errorText: {
     color: "#dc3545",
+    fontSize: 18,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+  successMessageContainer: {
+    padding: 16,
+    backgroundColor: "#d4edda",
+    borderRadius: 5,
+    marginVertical: 20,
+  },
+  successMessage: {
+    color: "#155724",
+    fontWeight: "bold",
+    textAlign: "center",
     fontSize: 16,
   },
 });

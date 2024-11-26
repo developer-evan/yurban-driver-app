@@ -81,7 +81,6 @@ export default function HomeScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       ToastAndroid.show("Status updated successfully!", ToastAndroid.SHORT);
-      
     },
     onError: (error: any) => {
       ToastAndroid.show(
@@ -90,7 +89,6 @@ export default function HomeScreen() {
       );
     },
   });
-
 
   const toggleStatus = () => {
     const newStatus = user?.user?.status === "Online" ? "Offline" : "Online";
@@ -164,6 +162,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 15,
     backgroundColor: "#1a1a1a",
+    // opacity to make the background color a bit transparent
+    opacity: 0.8,
   },
   statusText: {
     fontSize: 18,

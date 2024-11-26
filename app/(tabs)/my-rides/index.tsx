@@ -1,4 +1,6 @@
 import { Colors } from "@/constants/Colors";
+import { axiosInstance } from "@/lib/axiosInstance";
+import config from "@/lib/config";
 import { getDriverRides } from "@/services/getDriverRides";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -10,6 +12,7 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 
 type Ride = {
@@ -33,6 +36,25 @@ const MyRides = () => {
     queryKey: ["rides"],
     queryFn: getDriverRides,
   });
+
+  const handleCompleteRide = async (id: string) => {
+    try {
+      await axiosInstance.patch(`${config.apiUrl}/rides/${id}/complete`);
+      // alert("Ride marked as completed successfully!");
+      ToastAndroid.show(
+        "Ride marked as completed successfully!",
+        ToastAndroid.SHORT
+      );
+      refetch(); // Refresh the ride list after status update
+    } catch (error) {
+      // console.error("Failed to complete the ride:", error);
+      // alert("An error occurred while completing the ride.");
+      ToastAndroid.show(
+        "An error occurred while completing the ride.",
+        ToastAndroid.SHORT
+      );
+    }
+  };
 
   const renderRideCard = ({ item }: { item: Ride }) => (
     <TouchableOpacity
@@ -82,6 +104,8 @@ const MyRides = () => {
               item.status === "Pending"
                 ? styles.pending
                 : item.status === "Accepted"
+                ? styles.accepted
+                : item.status === "Completed"
                 ? styles.completed
                 : styles.cancelled,
             ]}
@@ -89,7 +113,36 @@ const MyRides = () => {
             {item.status}
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation();
+            router.push(`/(tabs)/my-rides/ride-details/${item._id}` as any);
+          }}
+        >
+          <Text style={{ color: Colors.dark.tint }}>View Details</Text>
+        </TouchableOpacity>
       </View>
+      {item.status === "Accepted" && (
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation();
+            handleCompleteRide(item._id);
+          }}
+        >
+          <Text
+            style={{
+              color: Colors.dark.text,
+              textAlign: "center",
+              padding: 10,
+              backgroundColor: Colors.light.tint,
+              borderRadius: 20,
+              marginTop: 8,
+            }}
+          >
+            Complete Ride
+          </Text>
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 
@@ -191,8 +244,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textTransform: "capitalize",
   },
-  completed: {
+  accepted: {
     color: "green",
+  },
+  completed: {
+    color: "#007BFF",
   },
   cancelled: {
     color: "red",

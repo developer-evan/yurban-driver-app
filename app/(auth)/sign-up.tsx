@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   Image,
+  ToastAndroid,
 } from "react-native";
 import axios from "axios";
 import { useRouter } from "expo-router";
@@ -15,8 +16,10 @@ import { Colors } from "@/constants/Colors";
 import { counties } from "@/constants/counties";
 import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-root-toast";
+import { axiosInstance } from "@/lib/axiosInstance";
+import config from "@/lib/config";
 
-const API_URL = "http://192.168.100.114:8000/api/auth/register"; // Update with your API URL
+
 
 export default function SignUp() {
   const [firstName, setFirstName] = useState("");
@@ -49,22 +52,26 @@ export default function SignUp() {
       !county ||
       !subCounty
     ) {
-      Alert.alert("Error", "Please fill in all fields.");
+      // Alert.alert("Error", "Please fill in all fields.");
+      ToastAndroid.show("Please fill in all fields.", ToastAndroid.SHORT);
       return;
     }
 
     try {
-      const response = await axios.post(API_URL, {
-        firstName,
-        lastName,
-        phoneNumber,
-        pin,
-        gender,
-        email,
-        role: "Driver",
-        county,
-        subCounty,
-      });
+      const response = await axiosInstance.post(
+        `${config.apiUrl}/auth/register`,
+        {
+          firstName,
+          lastName,
+          phoneNumber,
+          pin,
+          gender,
+          email,
+          role: "Driver",
+          county,
+          subCounty,
+        }
+      );
 
       const { message } = response.data;
       // Alert.alert("Success", message, [
