@@ -21,6 +21,7 @@ type Coordinates = {
 };
 
 type Ride = {
+  updatedAt: string | number | Date;
   customerId: {
     firstName: string;
     lastName: string;
@@ -158,10 +159,10 @@ const RideDetails = () => {
             ride.customerId?.lastName || ""
           }`}
         </Text>
-        <Text>Phone Number: {ride.customerId?.phoneNumber || "N/A"}</Text>
-        <Text>Pickup Location: {ride.pickupLocation || "N/A"}</Text>
-        <Text>Dropoff Location: {ride.dropoffLocation || "N/A"}</Text>
-        <Text>Passengers: {ride.passengerNumber || "N/A"}</Text>
+        <Text>Phone Number: {ride.customerId?.phoneNumber || "-"}</Text>
+        <Text>Pickup Location: {ride.pickupLocation || "-"}</Text>
+        <Text>Dropoff Location: {ride.dropoffLocation || "-"}</Text>
+        <Text>Passengers: {ride.passengerNumber || "-"}</Text>
         <Text
           style={{
             color:
@@ -174,14 +175,18 @@ const RideDetails = () => {
                 : "#007BFF",
           }}
         >
-          Status: {ride.status || "N/A"}
+          Status: {ride.status || "-"}
         </Text>
         <Text>
-          Requested At:{" "}
-          {ride.requestedAt
-            ? new Date(ride.requestedAt).toLocaleString()
-            : "N/A"}
+          Time Requested :{" "}
+          {ride.requestedAt ? new Date(ride.requestedAt).toLocaleString() : "-"}
         </Text>
+        {ride.status === "Completed" && (
+          <Text>
+            Time Completed:{" "}
+            {ride.updatedAt ? new Date(ride.updatedAt).toLocaleString() : "-"}
+          </Text>
+        )}
 
         {ride.status === "Completed" ? (
           <View style={styles.successMessageContainer}>
