@@ -15,7 +15,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/yurbann.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.developer_evan.driverapp",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +41,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "71c6dfc0-b51a-478b-bbb3-3c9a6c6536cb"
+      }
     }
   }
 }
