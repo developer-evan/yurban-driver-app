@@ -43,38 +43,7 @@ export default function HomeScreen() {
     queryKey: ["profile"],
     queryFn: getUserProfile,
   });
-  // const updateTaskMutation = useMutation({
-  //   mutationFn: async (updatedTask: any) => {
-  //     return updateTask(id, updatedTask);
-  //   },
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["task"] });
-  //     ToastAndroid.show("Task updated successfully", ToastAndroid.LONG);
-  //     router.push("/tasks");
-  //   },
-  //   onError: (error: any) => {
-  //     ToastAndroid.show(
-  //       error?.response?.data?.message || "Something went wrong",
-  //       ToastAndroid.LONG
-  //     );
-  //   },
-  // });
-  // const mutation = useMutation<void, Error, { status: string }>({
-  //   mutationFn: updateDriverStatus,
-  //   onSuccess: () => {
-  //     // Invalidate and refetch profile data to update UI
-  //     queryClient.invalidateQueries({ queryKey: ["profile"] });
-  //     ToastAndroid.show("Status updated successfully!", ToastAndroid.SHORT);
-  //   },
-  //   onError: (error: any) => {
-  //     ToastAndroid.show(
-  //       `Error updating status: ${error.message}`,
-  //       ToastAndroid.SHORT
-  //     );
-  //   },
-  // });
-
-  const updateStatusMutation = useMutation({
+    const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: any) => {
       return updateDriverStatus(newStatus);
     },
