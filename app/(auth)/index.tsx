@@ -18,9 +18,9 @@ const StartScreen = () => {
           const decodedToken = jwtDecode(accessToken);
 
           if (decodedToken.role === "Driver") {
-            router.replace("/(tabs)/home/home"); // Redirect to Home if Customer
+            router.replace("/(tabs)/home/home"); // Redirect to Home if Driver
           } else {
-            console.log("Access denied: Not a Customer");
+            console.log("Access denied: Not a Driver");
           }
         } else {
           console.log("No token found. Please sign in.");
