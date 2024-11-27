@@ -57,7 +57,9 @@ export default function TabLayout() {
               }}
             >
               <Image
-                source={{ uri: user?.user?.profilePicture }}
+                source={{
+                  uri: `https://avatar.iran.liara.run/public/boy?username=Ash`,
+                }}
                 style={{
                   width: 40,
                   height: 40,
@@ -87,7 +89,9 @@ export default function TabLayout() {
               }}
             >
               <Image
-                source={{ uri: user?.user?.profilePicture }}
+                source={{
+                  uri: `https://avatar.iran.liara.run/public/boy?username=Ash`,
+                }}
                 style={{
                   width: 40,
                   height: 40,
@@ -118,7 +122,9 @@ export default function TabLayout() {
               }}
             >
               <Image
-                source={{ uri: user?.user?.profilePicture }}
+                source={{
+                  uri: `https://avatar.iran.liara.run/public/boy?username=Ash`,
+                }}
                 style={{
                   width: 40,
                   height: 40,

@@ -62,15 +62,17 @@ const Profile = () => {
       <View style={styles.card}>
         <View style={styles.header}>
           <Image
-            source={{ uri: user?.user?.profilePicture }}
+            source={{
+              uri: `https://avatar.iran.liara.run/public/boy?username=Ash`,
+            }}
             style={styles.profileImage}
           />
           <View>
             <Text style={styles.name}>
-              {user?.user?.firstName} {user?.user?.lastName}
+              {user?.user?.firstName ?? "-"} {user?.user?.lastName ?? "-"}
             </Text>
             <Text style={styles.role}>
-              {user?.user?.role || "Not available"}
+              {user?.user?.role ?? "-"}
             </Text>
           </View>
         </View>
@@ -92,7 +94,7 @@ const Profile = () => {
 
           <View style={styles.detailContainer}>
             <MaterialIcons name="email" size={24} color="#6c757d" />
-            <Text style={styles.detailText}>{user?.user?.email}</Text>
+            <Text style={styles.detailText}>{user?.user?.email ?? "-"}</Text>
           </View>
         </View>
         <View
@@ -114,7 +116,7 @@ const Profile = () => {
           <View style={styles.detailContainer}>
             <FontAwesome name="phone" size={24} color="#6c757d" />
             <Text style={styles.detailText}>
-              {user?.user?.phoneNumber || "Not available"}
+              {user?.user?.phoneNumber ?? "-"}
             </Text>
           </View>
         </View>
@@ -137,7 +139,7 @@ const Profile = () => {
           <View style={styles.detailContainer}>
             <MapPinned size={24} color="#6c757d" />
             <Text style={styles.detailText}>
-              {user?.user?.county || "Not available"}
+              {user?.user?.county ?? "-"}
             </Text>
           </View>
         </View>
@@ -159,7 +161,7 @@ const Profile = () => {
           <View style={styles.detailContainer}>
             <MapPinned size={24} color="#6c757d" />
             <Text style={styles.detailText}>
-              {user?.user?.subCounty || "Not available"}
+              {user?.user?.subCounty ?? "-"}
             </Text>
           </View>
         </View>
@@ -182,7 +184,7 @@ const Profile = () => {
           <View style={styles.detailContainer}>
             <User size={24} color="#6c757d" />
             <Text style={styles.detailText}>
-              {user?.user?.gender || "Not available"}
+              {user?.user?.gender ?? "-"}
             </Text>
           </View>
         </View>
