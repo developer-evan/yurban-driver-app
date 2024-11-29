@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,28 @@ import {
   StyleSheet,
   ActivityIndicator,
   ToastAndroid,
+  Alert,
 } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from "expo-location";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserProfile } from "@/services/getProfile";
 import { updateDriverStatus } from "@/services/updateDriverStatus";
 
+// Nairobi Default Location
+const DEFAULT_LOCATION = {
+  latitude: -1.286389, // Nairobi, Kenya
+  longitude: 36.817223,
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01,
+};
+
 export default function HomeScreen() {
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
   const {
@@ -45,7 +60,35 @@ export default function HomeScreen() {
     updateStatusMutation.mutate({ status: newStatus });
   };
 
-  if (userLoading) {
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "Location access is required. Defaulting to Nairobi."
+          );
+          setLocation(DEFAULT_LOCATION);
+          return;
+        }
+
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation.coords);
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        Alert.alert(
+          "Error",
+          "Unable to fetch location. Defaulting to Nairobi."
+        );
+        setLocation(DEFAULT_LOCATION);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading || userLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -58,7 +101,23 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Map View */}
       <View style={styles.mapContainer}>
-        <MapView style={styles.map} />
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          initialRegion={{
+            latitude: location?.latitude || DEFAULT_LOCATION.latitude,
+            longitude: location?.longitude || DEFAULT_LOCATION.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+          showsUserLocation={true}
+          followsUserLocation={true}
+        >
+          <Marker
+            coordinate={location || DEFAULT_LOCATION}
+            title="Your Location"
+          />
+        </MapView>
       </View>
 
       {/* Status Controls */}
