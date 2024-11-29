@@ -7,18 +7,10 @@ import {
   ActivityIndicator,
   ToastAndroid,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserProfile } from "@/services/getProfile";
 import { updateDriverStatus } from "@/services/updateDriverStatus";
-
-// Nairobi Default Location
-const DEFAULT_LOCATION = {
-  latitude: -1.286389, // Nairobi, Kenya
-  longitude: 36.817223,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01,
-};
 
 export default function HomeScreen() {
   const queryClient = useQueryClient();
@@ -66,14 +58,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Map View */}
       <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          initialRegion={DEFAULT_LOCATION}
-          showsUserLocation={false} // Disable user location tracking
-          followsUserLocation={false}
-        >
-          <Marker coordinate={DEFAULT_LOCATION} title="Nairobi" />
-        </MapView>
+        <MapView style={styles.map} />
       </View>
 
       {/* Status Controls */}

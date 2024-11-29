@@ -39,11 +39,6 @@ type Ride = {
   requestedAt: string;
 };
 
-const DEFAULT_LOCATION: Coordinates = {
-  latitude: -1.286389,
-  longitude: 36.817223,
-};
-
 const RideDetails = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -114,21 +109,7 @@ const RideDetails = () => {
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: DEFAULT_LOCATION.latitude,
-          longitude: DEFAULT_LOCATION.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      >
-        <Marker
-          coordinate={DEFAULT_LOCATION}
-          title="Nairobi"
-          description="Default Location"
-        />
-      </MapView>
+      <MapView style={styles.map} />
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>Ride Details</Text>
         <Text>
@@ -138,8 +119,12 @@ const RideDetails = () => {
             : "-"}
         </Text>
         <Text>Phone Number: {ride?.customerId?.phoneNumber || "-"}</Text>
-        <Text>Pickup Location: {ride?.pickupLocation || "Default Location"}</Text>
-        <Text>Dropoff Location: {ride?.dropoffLocation || "Default Location"}</Text>
+        <Text>
+          Pickup Location: {ride?.pickupLocation || "Default Location"}
+        </Text>
+        <Text>
+          Dropoff Location: {ride?.dropoffLocation || "Default Location"}
+        </Text>
         <Text>Passengers: {ride?.passengerNumber || "-"}</Text>
         <Text
           style={{
@@ -164,9 +149,7 @@ const RideDetails = () => {
         {ride?.status === "Completed" && (
           <Text>
             Time Completed:{" "}
-            {ride?.updatedAt
-              ? new Date(ride.updatedAt).toLocaleString()
-              : "-"}
+            {ride?.updatedAt ? new Date(ride.updatedAt).toLocaleString() : "-"}
           </Text>
         )}
         {ride?.status === "Completed" ? (
