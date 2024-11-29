@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   ToastAndroid,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getRideDetails } from "@/services/getRideDetails";
@@ -39,7 +39,6 @@ type Ride = {
   requestedAt: string;
 };
 
-// Default location for Nairobi
 const DEFAULT_LOCATION: Coordinates = {
   latitude: -1.286389,
   longitude: 36.817223,
@@ -64,6 +63,7 @@ const RideDetails = () => {
   } = useQuery<Ride>({
     queryKey: ["ride", id],
     queryFn: () => getRideDetails(id as string),
+    retry: 1,
   });
 
   const updateRideStatus = async (status: string) => {
@@ -102,7 +102,7 @@ const RideDetails = () => {
     );
   }
 
-  if (error || !ride) {
+  if (error) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
@@ -112,77 +112,64 @@ const RideDetails = () => {
     );
   }
 
-  // Use ride coordinates or fall back to the default location
-  const pickupCoordinates = ride.pickupCoordinates || DEFAULT_LOCATION;
-  const dropoffCoordinates = ride.dropoffCoordinates || DEFAULT_LOCATION;
-
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: pickupCoordinates.latitude,
-          longitude: pickupCoordinates.longitude,
+          latitude: DEFAULT_LOCATION.latitude,
+          longitude: DEFAULT_LOCATION.longitude,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
         }}
       >
         <Marker
-          coordinate={pickupCoordinates}
-          title="Pickup Location"
-          description={ride.pickupLocation || "Default Location"}
-        />
-        <Marker
-          coordinate={dropoffCoordinates}
-          title="Dropoff Location"
-          description={ride.dropoffLocation || "Default Location"}
-        />
-        <Polyline
-          coordinates={[pickupCoordinates, dropoffCoordinates]}
-          strokeColor="#007BFF"
-          strokeWidth={4}
+          coordinate={DEFAULT_LOCATION}
+          title="Nairobi"
+          description="Default Location"
         />
       </MapView>
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>Ride Details</Text>
         <Text>
           Passenger Name:{" "}
-          {`${ride.customerId?.firstName || ""} ${
-            ride.customerId?.lastName || ""
-          }`}
+          {ride?.customerId
+            ? `${ride.customerId.firstName} ${ride.customerId.lastName}`
+            : "-"}
         </Text>
-        <Text>Phone Number: {ride.customerId?.phoneNumber || "-"}</Text>
-        <Text>Pickup Location: {ride.pickupLocation || "Default Location"}</Text>
-        <Text>Dropoff Location: {ride.dropoffLocation || "Default Location"}</Text>
-        <Text>Passengers: {ride.passengerNumber || "-"}</Text>
+        <Text>Phone Number: {ride?.customerId?.phoneNumber || "-"}</Text>
+        <Text>Pickup Location: {ride?.pickupLocation || "Default Location"}</Text>
+        <Text>Dropoff Location: {ride?.dropoffLocation || "Default Location"}</Text>
+        <Text>Passengers: {ride?.passengerNumber || "-"}</Text>
         <Text
           style={{
             color:
-              ride.status === "Pending"
+              ride?.status === "Pending"
                 ? "orange"
-                : ride.status === "Accepted"
+                : ride?.status === "Accepted"
                 ? "green"
-                : ride.status === "Rejected"
+                : ride?.status === "Rejected"
                 ? "red"
                 : "#007BFF",
           }}
         >
-          Status: {ride.status || "-"}
+          Status: {ride?.status || "-"}
         </Text>
         <Text>
-          Time Requested :{" "}
-          {ride.requestedAt ? new Date(ride.requestedAt).toLocaleString() : "-"}
+          Time Requested:{" "}
+          {ride?.requestedAt
+            ? new Date(ride.requestedAt).toLocaleString()
+            : "-"}
         </Text>
-        {ride.status === "Completed" && (
+        {ride?.status === "Completed" && (
           <Text>
             Time Completed:{" "}
-            {ride.updatedAt
+            {ride?.updatedAt
               ? new Date(ride.updatedAt).toLocaleString()
               : "-"}
           </Text>
         )}
-
-        {ride.status === "Completed" ? (
+        {ride?.status === "Completed" ? (
           <View style={styles.successMessageContainer}>
             <Text style={styles.successMessage}>
               The ride has been completed successfully!
@@ -212,85 +199,68 @@ const RideDetails = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f2f2f2",
   },
   map: {
     flex: 1,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    overflow: "hidden",
   },
   detailsContainer: {
+    flex: 1,
     padding: 16,
-    backgroundColor: "#ffffff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    backgroundColor: "#f9f9f9",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 20,
+    fontWeight: "bold",
     marginBottom: 10,
-    color: "#333",
   },
   actions: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     marginTop: 20,
   },
   acceptButton: {
     backgroundColor: "#28a745",
-    paddingVertical: 12,
-    borderRadius: 10,
-    width: "48%",
-    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
   },
   declineButton: {
     backgroundColor: "#dc3545",
-    paddingVertical: 12,
-    borderRadius: 10,
-    width: "48%",
-    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "bold",
     fontSize: 16,
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
     padding: 20,
   },
   errorText: {
-    color: "#dc3545",
-    fontSize: 18,
-    fontWeight: "500",
+    color: "red",
+    fontSize: 16,
     textAlign: "center",
   },
   successMessageContainer: {
-    padding: 16,
+    marginTop: 20,
+    padding: 10,
     backgroundColor: "#d4edda",
     borderRadius: 5,
-    marginVertical: 20,
   },
   successMessage: {
     color: "#155724",
-    fontWeight: "bold",
-    textAlign: "center",
     fontSize: 16,
+    textAlign: "center",
   },
 });
 

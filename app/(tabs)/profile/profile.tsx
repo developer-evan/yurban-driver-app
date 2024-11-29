@@ -6,9 +6,10 @@ import {
   View,
   Image,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogOut, MapPinned, User } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -16,14 +17,31 @@ import { getUserProfile } from "@/services/getProfile";
 import { Colors } from "@/constants/Colors";
 
 const Profile = () => {
+  const queryClient = useQueryClient();
+
   const {
     data: user,
     isLoading,
     error,
   } = useQuery({
     queryKey: ["profile"],
-    queryFn: getUserProfile,
+    queryFn: async () => {
+      const cachedUser = await AsyncStorage.getItem("user_profile");
+      if (cachedUser) {
+        return JSON.parse(cachedUser);
+      }
+      const fetchedUser = await getUserProfile();
+      await AsyncStorage.setItem("user_profile", JSON.stringify(fetchedUser));
+      return fetchedUser;
+    },
   });
+
+  if (error) {
+    Alert.alert(
+      "Error",
+      "Failed to load profile. Please check your internet connection."
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -32,11 +50,13 @@ const Profile = () => {
         "username",
         "session_token",
         "email",
+        "user_profile",
       ]);
       console.log("User logged out successfully.");
       router.push("/(auth)" as any);
     } catch (error) {
       console.error("Failed to log out:", error);
+      Alert.alert("Logout Error", "Failed to log out. Please try again.");
     }
   };
 
@@ -49,10 +69,15 @@ const Profile = () => {
     );
   }
 
-  if (error) {
+  if (error || !user) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Failed to load profile</Text>
+        <TouchableOpacity
+          onPress={() => queryClient.invalidateQueries({ queryKey: ["profile"] })}
+        >
+          <Text style={{ color: Colors.light.tint, marginTop: 10 }}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -61,9 +86,9 @@ const Profile = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.header}>
-          <Image
+        <Image
             source={{
-              uri: `https://avatar.iran.liara.run/public/boy?username=Ash`,
+              uri: "https://avatar.iran.liara.run/public/boy?username=Ash",
             }}
             style={styles.profileImage}
           />
@@ -71,48 +96,18 @@ const Profile = () => {
             <Text style={styles.name}>
               {user?.user?.firstName ?? "-"} {user?.user?.lastName ?? "-"}
             </Text>
-            <Text style={styles.role}>
-              {user?.user?.role ?? "-"}
-            </Text>
+            <Text style={styles.role}>{user?.user?.role ?? "-"}</Text>
           </View>
         </View>
-        <View
-          style={{
-            // borderBottomWidth: 1,
-            // borderBottomColor: "#f1f1f1",
-            marginBottom: 8,
-            paddingBottom: 5,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.light.tint,
-            }}
-          >
-            Email
-          </Text>
-
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>Email</Text>
           <View style={styles.detailContainer}>
             <MaterialIcons name="email" size={24} color="#6c757d" />
             <Text style={styles.detailText}>{user?.user?.email ?? "-"}</Text>
           </View>
         </View>
-        <View
-          style={{
-            // borderBottomWidth: 1,
-            // borderBottomColor: "#f1f1f1",
-            marginBottom: 8,
-            paddingBottom: 5,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.light.tint,
-            }}
-          >
-            Phone:
-          </Text>
-
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>Phone</Text>
           <View style={styles.detailContainer}>
             <FontAwesome name="phone" size={24} color="#6c757d" />
             <Text style={styles.detailText}>
@@ -120,44 +115,15 @@ const Profile = () => {
             </Text>
           </View>
         </View>
-
-        <View
-          style={{
-            // borderBottomWidth: 1,
-            // borderBottomColor: "#f1f1f1",
-            marginBottom: 8,
-            paddingBottom: 5,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.light.tint,
-            }}
-          >
-            County
-          </Text>
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>County</Text>
           <View style={styles.detailContainer}>
             <MapPinned size={24} color="#6c757d" />
-            <Text style={styles.detailText}>
-              {user?.user?.county ?? "-"}
-            </Text>
+            <Text style={styles.detailText}>{user?.user?.county ?? "-"}</Text>
           </View>
         </View>
-        <View
-          style={{
-            // borderBottomWidth: 1,
-            // borderBottomColor: "#f1f1f1",
-            marginBottom: 8,
-            paddingBottom: 5,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.light.tint,
-            }}
-          >
-            Sub-County
-          </Text>
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>Sub-County</Text>
           <View style={styles.detailContainer}>
             <MapPinned size={24} color="#6c757d" />
             <Text style={styles.detailText}>
@@ -165,27 +131,11 @@ const Profile = () => {
             </Text>
           </View>
         </View>
-
-        <View
-          style={{
-            // borderBottomWidth: 1,
-            // borderBottomColor: "#f1f1f1",
-            marginBottom: 8,
-            paddingBottom: 5,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.light.tint,
-            }}
-          >
-            Gender
-          </Text>
+        <View style={styles.detailSection}>
+          <Text style={styles.detailLabel}>Gender</Text>
           <View style={styles.detailContainer}>
             <User size={24} color="#6c757d" />
-            <Text style={styles.detailText}>
-              {user?.user?.gender ?? "-"}
-            </Text>
+            <Text style={styles.detailText}>{user?.user?.gender ?? "-"}</Text>
           </View>
         </View>
       </View>
@@ -239,6 +189,13 @@ const styles = StyleSheet.create({
   role: {
     fontSize: 16,
     color: "#6c757d",
+  },
+  detailSection: {
+    marginBottom: 8,
+    paddingBottom: 5,
+  },
+  detailLabel: {
+    color: Colors.light.tint,
   },
   detailContainer: {
     flexDirection: "row",

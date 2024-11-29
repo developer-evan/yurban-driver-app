@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -6,10 +6,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   ToastAndroid,
-  Alert,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from "expo-location";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserProfile } from "@/services/getProfile";
 import { updateDriverStatus } from "@/services/updateDriverStatus";
@@ -23,11 +21,6 @@ const DEFAULT_LOCATION = {
 };
 
 export default function HomeScreen() {
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
   const {
@@ -60,35 +53,7 @@ export default function HomeScreen() {
     updateStatusMutation.mutate({ status: newStatus });
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(
-            "Permission Denied",
-            "Location access is required. Defaulting to Nairobi."
-          );
-          setLocation(DEFAULT_LOCATION);
-          return;
-        }
-
-        const currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation.coords);
-      } catch (error) {
-        console.error("Error fetching location:", error);
-        Alert.alert(
-          "Error",
-          "Unable to fetch location. Defaulting to Nairobi."
-        );
-        setLocation(DEFAULT_LOCATION);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  if (loading || userLoading) {
+  if (userLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -103,19 +68,11 @@ export default function HomeScreen() {
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}
-          initialRegion={{
-            latitude: location?.latitude || DEFAULT_LOCATION.latitude,
-            longitude: location?.longitude || DEFAULT_LOCATION.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          }}
-          showsUserLocation={true}
-          followsUserLocation={true}
+          initialRegion={DEFAULT_LOCATION}
+          showsUserLocation={false} // Disable user location tracking
+          followsUserLocation={false}
         >
-          <Marker
-            coordinate={location || DEFAULT_LOCATION}
-            title="Your Location"
-          />
+          <Marker coordinate={DEFAULT_LOCATION} title="Nairobi" />
         </MapView>
       </View>
 
