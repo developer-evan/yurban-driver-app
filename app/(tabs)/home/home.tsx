@@ -124,8 +124,8 @@ export default function HomeScreen() {
       <View style={styles.statusContainer}>
         <Text style={styles.statusText}>
           {user?.user?.status === "Online"
-            ? "You are ONLINE"
-            : "You are OFFLINE"}
+            ? "You are Online"
+            : "You are Offline"}
         </Text>
         <TouchableOpacity
           style={[
